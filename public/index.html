@@ -3,20 +3,54 @@
 
 <head>
 <meta charset="UTF-8">
-<title>NFC Dashboard</title>
+<title>NFC Leaderboard</title>
 <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<h1>Lecturas NFC</h1>
+<h1>🏆 Clasificación NFC</h1>
+
+<div id="podium">
+
+<div class="podium-slot" id="first">
+<h2>🥇</h2>
+<div class="name"></div>
+<div class="score"></div>
+</div>
+
+<div class="podium-slot" id="second">
+<h2>🥈</h2>
+<div class="name"></div>
+<div class="score"></div>
+</div>
+
+<div class="podium-slot" id="third">
+<h2>🥉</h2>
+<div class="name"></div>
+<div class="score"></div>
+</div>
+
+</div>
+
+<h2>Clasificación completa</h2>
+
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Pulsera</th>
+<th>Puntos</th>
+<th>Último escaneo</th>
+</tr>
+</thead>
+
+<tbody id="tableBody"></tbody>
+</table>
 
 <button id="scanButton">Simular escaneo</button>
-
-<ul id="list"></ul>
 
 <script type="module" src="app.js"></script>
 
 </body>
-
 </html>
