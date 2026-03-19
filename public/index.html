@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>NFC Dashboard</title>
+</head>
+
+<body>
+
+<h1>Lecturas NFC</h1>
+
+<button onclick="simulateScan()">Simular escaneo</button>
+
+<ul id="list"></ul>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, onSnapshot } 
+from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyD2rF_yecrLu8u4-f2AutqcMmxzemtJdhg",
+  authDomain: "a40-nfc-reader.firebaseapp.com",
+  projectId: "a40-nfc-reader",
+  storageBucket: "a40-nfc-reader.firebasestorage.app",
+  messagingSenderId: "452952268220",
+  appId: "1:452952268220:web:e534c5f962ae924e311fb9"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const list = document.getElementById("list");
+
+const scansCollection = collection(db,"scans");
+
+onSnapshot(scansCollection,(snapshot)=>{
+
+    list.innerHTML="";
+
+    snapshot.forEach((docItem)=>{
+
+        const data=docItem.data();
+
+        const li=document.createElement("li");
+        li.textContent=data.uid+" → "+data.count;
+
+        list.appendChild(li);
+
+    });
+
+});
+
+window.simulateScan = async function(){
+
+    const randomUID="bracelet_"+Math.floor(Math.random()*3+1);
+
+    const ref=doc(db,"scans",randomUID);
+
+    const snap=await getDoc(ref);
+
+    if(!snap.exists()){
+
+        await setDoc(ref,{
+            uid:randomUID,
+            count:1
+        });
+
+    }else{
+
+        const current=snap.data().count;
+
+        await updateDoc(ref,{
+            count:current+1
+        });
+
+    }
+
+}
+
+</script>
+
+</body>
+</html>
