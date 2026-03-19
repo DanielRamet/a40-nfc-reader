@@ -11,18 +11,26 @@ h1 {
   margin-bottom: 30px;
 }
 
+/* PODIO */
+
 #podium {
   display: flex;
   justify-content: center;
+  align-items: flex-end;
   gap: 40px;
-  margin-bottom: 40px;
+  margin-bottom: 50px;
 }
 
 .podium-slot {
   background: #222;
   padding: 20px;
-  border-radius: 10px;
+  border-radius: 12px;
   width: 180px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.podium-slot:hover {
+  transform: translateY(-5px);
 }
 
 #first {
@@ -43,6 +51,7 @@ h1 {
 .name {
   font-size: 20px;
   margin-top: 10px;
+  font-family: monospace;
 }
 
 .score {
@@ -50,30 +59,61 @@ h1 {
   font-weight: bold;
 }
 
+/* TABLA */
+
 table {
   margin: auto;
   border-collapse: collapse;
-  width: 60%;
+  width: 80%;
+  max-width: 900px;
+  background: #1a1a1a;
+  border-radius: 10px;
+  overflow: hidden;
 }
 
 th,
 td {
-  padding: 10px;
+  padding: 12px;
   border-bottom: 1px solid #444;
 }
 
 th {
   background: #333;
+  font-weight: bold;
 }
+
+tr:hover {
+  background: #222;
+}
+
+/* cooldown visual */
+
+.cooldown {
+  color: #ff6b6b;
+}
+
+/* BOTÓN */
 
 button {
   margin-top: 30px;
-  padding: 10px 20px;
+  padding: 12px 25px;
   font-size: 16px;
   cursor: pointer;
+  border-radius: 6px;
+  border: none;
+  background: #00c3ff;
+  color: black;
+  font-weight: bold;
+  transition: transform 0.2s ease, background 0.2s ease;
 }
 
-/* Animaciones */
+button:hover {
+  background: #00a5d8;
+  transform: scale(1.05);
+}
+
+/* ANIMACIONES */
+
 @keyframes bounce {
   0% { transform: scale(1); }
   30% { transform: scale(1.2); }
@@ -110,4 +150,45 @@ button {
 
 .podium-animate-bronze {
   animation: bounce 0.6s ease, flashBronze 0.6s ease;
+}
+
+#scanNotification {
+  position: fixed;
+  top: 30px;
+  right: 30px;
+  font-size: 22px;
+  background: #00ff88;
+  color: black;
+  padding: 15px 25px;
+  border-radius: 10px;
+  font-weight: bold;
+  opacity: 0;
+  transform: translateY(-20px);
+  pointer-events: none;
+}
+
+.scan-show {
+  animation: scanPopup 2s ease forwards;
+}
+
+@keyframes scanPopup {
+
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+
+  10% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  80% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
 }
