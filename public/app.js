@@ -6,24 +6,37 @@ getDoc,
 setDoc,
 updateDoc,
 collection,
+query,
+orderBy,
 onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const list = document.getElementById("list");
 const button = document.getElementById("scanButton");
 
-const scansCollection = collection(db,"scans");
+const scansQuery = query(
+    collection(db,"scans"),
+    orderBy("count","desc")
+);
 
-onSnapshot(scansCollection,(snapshot)=>{
+onSnapshot(scansQuery,(snapshot)=>{
 
     list.innerHTML="";
 
     snapshot.forEach((docItem)=>{
 
-        const data = docItem.data();
+        const data=docItem.data();
+
+        const date=new Date(data.lastScan);
+
+        const time=date.toLocaleTimeString();
 
         const li=document.createElement("li");
-        li.textContent=data.uid+" → "+data.count;
+
+        li.textContent=
+        data.uid+
+        " → "+data.count+
+        " (último: "+time+")";
 
         list.appendChild(li);
 
@@ -41,20 +54,34 @@ async function simulateScan(){
 
     const snap=await getDoc(ref);
 
+    const now=Date.now();
+
+    const cooldown=480000;
+
     if(!snap.exists()){
 
         await setDoc(ref,{
             uid:randomUID,
-            count:1
+            count:1,
+            lastScan:now
         });
 
     }else{
 
-        const current=snap.data().count;
+        const data=snap.data();
 
-        await updateDoc(ref,{
-            count:current+1
-        });
+        if(now - data.lastScan > cooldown){
+
+            await updateDoc(ref,{
+                count:data.count+1,
+                lastScan:now
+            });
+
+        }else{
+
+            console.log("Scan ignorado (cooldown)");
+
+        }
 
     }
 
