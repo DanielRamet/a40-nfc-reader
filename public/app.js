@@ -1,114 +1,123 @@
 import { db } from "./firebase.js";
 
 import {
-doc,
-getDoc,
-setDoc,
-updateDoc,
-collection,
-query,
-orderBy,
-onSnapshot
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  collection,
+  query,
+  orderBy,
+  onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-const tableBody=document.getElementById("tableBody");
-const button=document.getElementById("scanButton");
+const tableBody = document.getElementById("tableBody");
+const button = document.getElementById("scanButton");
 
-const scansQuery=query(
-collection(db,"scans"),
-orderBy("count","desc")
+const scansQuery = query(
+  collection(db, "scans"),
+  orderBy("count", "desc")
 );
 
-onSnapshot(scansQuery,(snapshot)=>{
+const COOLDOWN = 8 * 60 * 1000; // 8 minutos en ms
 
-tableBody.innerHTML="";
+// Función para actualizar podio y tabla
+onSnapshot(scansQuery, (snapshot) => {
 
-let ranking=[];
+  tableBody.innerHTML = "";
+  let ranking = [];
 
-snapshot.forEach((docItem)=>{
-ranking.push(docItem.data());
-});
+  snapshot.forEach((docItem) => {
+    ranking.push(docItem.data());
+  });
 
-updatePodium(ranking);
-
-ranking.forEach((data,index)=>{
-
-const date=new Date(data.lastScan);
-const time=date.toLocaleTimeString();
-
-const row=document.createElement("tr");
-
-row.innerHTML=
-`
-<td>${index+1}</td>
-<td>${data.uid}</td>
-<td>${data.count}</td>
-<td>${time}</td>
-`;
-
-tableBody.appendChild(row);
+  updatePodium(ranking);
+  updateTable(ranking);
 
 });
 
-});
+// Actualizar los 3 primeros en podio
+function updatePodium(ranking) {
+  const first = ranking[0];
+  const second = ranking[1];
+  const third = ranking[2];
 
-function updatePodium(ranking){
+  if (first) {
+    document.querySelector("#first .name").textContent = first.uid;
+    document.querySelector("#first .score").textContent = first.count;
+  } else {
+    document.querySelector("#first .name").textContent = "";
+    document.querySelector("#first .score").textContent = "";
+  }
 
-const first=ranking[0];
-const second=ranking[1];
-const third=ranking[2];
+  if (second) {
+    document.querySelector("#second .name").textContent = second.uid;
+    document.querySelector("#second .score").textContent = second.count;
+  } else {
+    document.querySelector("#second .name").textContent = "";
+    document.querySelector("#second .score").textContent = "";
+  }
 
-if(first){
-document.querySelector("#first .name").textContent=first.uid;
-document.querySelector("#first .score").textContent=first.count;
+  if (third) {
+    document.querySelector("#third .name").textContent = third.uid;
+    document.querySelector("#third .score").textContent = third.count;
+  } else {
+    document.querySelector("#third .name").textContent = "";
+    document.querySelector("#third .score").textContent = "";
+  }
 }
 
-if(second){
-document.querySelector("#second .name").textContent=second.uid;
-document.querySelector("#second .score").textContent=second.count;
-}
+// Actualizar la tabla completa, mostrando cooldown
+function updateTable(ranking) {
 
-if(third){
-document.querySelector("#third .name").textContent=third.uid;
-document.querySelector("#third .score").textContent=third.count;
-}
+  const now = Date.now();
 
-}
+  ranking.forEach((data, index) => {
+    const lastScan = data.lastScan || 0;
+    const remaining = Math.max(0, COOLDOWN - (now - lastScan));
+    const minutes = Math.floor(remaining / 60000);
+    const seconds = Math.floor((remaining % 60000) / 1000);
 
-button.addEventListener("click",simulateScan);
+    const timeStr = lastScan ? new Date(lastScan).toLocaleTimeString() : "-";
 
-async function simulateScan(){
-
-const randomUID="bracelet_"+Math.floor(Math.random()*5+1);
-
-const ref=doc(db,"scans",randomUID);
-
-const snap=await getDoc(ref);
-
-const now=Date.now();
-const cooldown=480000;
-
-if(!snap.exists()){
-
-await setDoc(ref,{
-uid:randomUID,
-count:1,
-lastScan:now
-});
-
-}else{
-
-const data=snap.data();
-
-if(now-data.lastScan>cooldown){
-
-await updateDoc(ref,{
-count:data.count+1,
-lastScan:now
-});
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${index + 1}</td>
+      <td>${data.uid}</td>
+      <td>${data.count}</td>
+      <td>${timeStr}${remaining > 0 ? ` (activo en ${minutes}:${seconds.toString().padStart(2,'0')})` : ""}</td>
+    `;
+    tableBody.appendChild(row);
+  });
 
 }
 
-}
+// Función de simulación de escaneo
+button.addEventListener("click", simulateScan);
+
+async function simulateScan() {
+
+  const randomUID = "bracelet_" + Math.floor(Math.random() * 5 + 1);
+  const ref = doc(db, "scans", randomUID);
+  const snap = await getDoc(ref);
+  const now = Date.now();
+
+  if (!snap.exists()) {
+    await setDoc(ref, {
+      uid: randomUID,
+      count: 1,
+      lastScan: now
+    });
+  } else {
+    const data = snap.data();
+    if (now - data.lastScan > COOLDOWN) {
+      await updateDoc(ref, {
+        count: data.count + 1,
+        lastScan: now
+      });
+    } else {
+      console.log("Scan ignorado (cooldown)");
+    }
+  }
 
 }
