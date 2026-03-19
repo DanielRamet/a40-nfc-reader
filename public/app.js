@@ -14,8 +14,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const tableBody = document.getElementById("tableBody");
   const button = document.getElementById("scanButton");
+  const cooldownMessage = document.getElementById("cooldownMessage");
 
-  if (!tableBody || !button) {
+  if (!tableBody || !button || !cooldownMessage) {
     console.error("No se encontraron elementos del DOM. Revisa los IDs.");
     return;
   }
@@ -25,14 +26,11 @@ document.addEventListener("DOMContentLoaded", () => {
     orderBy("count", "desc")
   );
 
-  const COOLDOWN = 8 * 60 * 1000; // 8 minutos en ms
+  const COOLDOWN = 8 * 60 * 1000; // 8 minutos
+  let lastPodium = { first: "", second: "", third: "" };
 
-  // Actualizar podio y tabla en tiempo real
+  // Escucha en tiempo real
   onSnapshot(scansQuery, (snapshot) => {
-
-    // Verifica que tableBody aún existe
-    if (!tableBody) return;
-
     tableBody.innerHTML = "";
     let ranking = [];
 
@@ -42,44 +40,38 @@ document.addEventListener("DOMContentLoaded", () => {
 
     updatePodium(ranking);
     updateTable(ranking);
-
   });
 
-  // Actualizar los 3 primeros en podio
+  // Actualiza podio con animaciones
   function updatePodium(ranking) {
-    const first = ranking[0];
-    const second = ranking[1];
-    const third = ranking[2];
+    const podiumSlots = ["first", "second", "third"];
+    const animations = ["podium-animate-gold", "podium-animate-silver", "podium-animate-bronze"];
 
-    if (first) {
-      const el = document.querySelector("#first .name");
-      const sc = document.querySelector("#first .score");
-      if (el && sc) {
-        el.textContent = first.uid;
-        sc.textContent = first.count;
-      }
-    }
+    podiumSlots.forEach((slot, i) => {
+      const data = ranking[i];
+      const nameEl = document.querySelector(`#${slot} .name`);
+      const scoreEl = document.querySelector(`#${slot} .score`);
+      if (!nameEl || !scoreEl) return;
 
-    if (second) {
-      const el = document.querySelector("#second .name");
-      const sc = document.querySelector("#second .score");
-      if (el && sc) {
-        el.textContent = second.uid;
-        sc.textContent = second.count;
-      }
-    }
+      const uid = data ? data.uid : "";
 
-    if (third) {
-      const el = document.querySelector("#third .name");
-      const sc = document.querySelector("#third .score");
-      if (el && sc) {
-        el.textContent = third.uid;
-        sc.textContent = third.count;
+      if (lastPodium[slot] !== uid && uid !== "") {
+        nameEl.classList.add(animations[i]);
+        scoreEl.classList.add(animations[i]);
+        setTimeout(() => {
+          nameEl.classList.remove(animations[i]);
+          scoreEl.classList.remove(animations[i]);
+        }, 600);
       }
-    }
+
+      nameEl.textContent = uid;
+      scoreEl.textContent = data ? data.count : "";
+
+      lastPodium[slot] = uid;
+    });
   }
 
-  // Actualizar tabla completa, mostrando cooldown
+  // Actualiza tabla completa con cooldown
   function updateTable(ranking) {
     const now = Date.now();
 
@@ -102,7 +94,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Función de simulación de escaneo
+  // Simulación de escaneo
   button.addEventListener("click", simulateScan);
 
   async function simulateScan() {
@@ -125,6 +117,10 @@ document.addEventListener("DOMContentLoaded", () => {
           lastScan: now
         });
       } else {
+        cooldownMessage.style.display = "block";
+        setTimeout(() => {
+          cooldownMessage.style.display = "none";
+        }, 3000);
         console.log("Scan ignorado (cooldown)");
       }
     }
