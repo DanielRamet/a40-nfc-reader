@@ -2,62 +2,78 @@
 <html>
 
 <head>
-  <meta charset="UTF-8">
-  <title>NFC Leaderboard</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="icon" type="image/png" href="favicon.png">
+
+    <meta charset="UTF-8">
+    <title>Drunk Meter</title>
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="favicon.png">
+
 </head>
 
 <body>
 
-  <h1>🏆 Clasificación NFC</h1>
+    <h1>🍻 DRUNK METER</h1>
 
-  <div id="podium">
+    <div id="globalCounter">
 
-    <div class="podium-slot" id="first">
-      <h2>🥇</h2>
-      <div class="name"></div>
-      <div class="score"></div>
+        TOTAL BEBIDAS
+
+        <div id="totalScans">
+            0
+        </div>
+
     </div>
 
-    <div class="podium-slot" id="second">
-      <h2>🥈</h2>
-      <div class="name"></div>
-      <div class="score"></div>
+    <div id="podium">
+
+        <div class="podium-slot" id="second">
+            <h2>🥈</h2>
+            <div class="name"></div>
+            <div class="score"></div>
+        </div>
+
+        <div class="podium-slot" id="first">
+            <h2>🥇</h2>
+            <div class="name"></div>
+            <div class="score"></div>
+        </div>
+
+        <div class="podium-slot" id="third">
+            <h2>🥉</h2>
+            <div class="name"></div>
+            <div class="score"></div>
+        </div>
+
     </div>
 
-    <div class="podium-slot" id="third">
-      <h2>🥉</h2>
-      <div class="name"></div>
-      <div class="score"></div>
+    <h2>Ranking</h2>
+
+    <div id="tableContainer">
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>#</th>
+                    <th>Nombre</th>
+                    <th>Bebidas</th>
+                    <th>Última</th>
+                </tr>
+
+            </thead>
+
+            <tbody id="tableBody"></tbody>
+
+        </table>
+
     </div>
 
-  </div>
+    <div id="scanNotification"></div>
 
-  <h2>Clasificación completa</h2>
+    <script type="module" src="app.js"></script>
 
-  <table>
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>Pulsera</th>
-        <th>Puntos</th>
-        <th>Último escaneo</th>
-      </tr>
-    </thead>
-    <tbody id="tableBody"></tbody>
-  </table>
-
-  <!-- Mensaje global de cooldown -->
-  <div id="cooldownMessage" style="color:#ff4444; font-size:18px; margin:20px 0; display:none;">
-    Por favor espere unos minutos antes de volver a escanear esta pulsera.
-  </div>
-
-  <button id="scanButton">Simular escaneo</button>
-
-  <script type="module" src="app.js"></script>
-
-  <div id="scanNotification"></div>
 </body>
 
 </html>

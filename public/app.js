@@ -1,229 +1,217 @@
-import { db } from "./firebase.js";
+import { db } from "./firebase.js"
 
 import {
-  doc,
-  getDoc,
-  setDoc,
-  updateDoc,
-  increment,
-  collection,
-  query,
-  orderBy,
-  onSnapshot
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
+    collection,
+    query,
+    orderBy,
+    onSnapshot
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js"
 
 document.addEventListener("DOMContentLoaded", () => {
 
-  const tableBody = document.getElementById("tableBody");
-  const button = document.getElementById("scanButton");
-  const cooldownMessage = document.getElementById("cooldownMessage");
+    const tableBody = document.getElementById("tableBody")
+    const totalScansEl = document.getElementById("totalScans")
+    const tableContainer = document.getElementById("tableContainer")
 
-  if (!tableBody || !button || !cooldownMessage) {
-    console.error("No se encontraron elementos del DOM. Revisa los IDs.");
-    return;
-  }
+    let previousCounts = {}
+    let previousRanking = []
 
-  const scansQuery = query(
-    collection(db, "scans"),
-    orderBy("count", "desc")
-  );
+    startAutoScroll()
 
-  const COOLDOWN = 8 * 60 * 1000;
+    const scansQuery = query(
+        collection(db, "scans"),
+        orderBy("count", "desc")
+    )
 
-  let lastPodium = {
-    first: "",
-    second: "",
-    third: ""
-  };
+    onSnapshot(scansQuery, (snapshot) => {
 
-  let previousCounts = {};
+        let ranking = []
+        let total = 0
 
+        snapshot.forEach((docItem) => {
 
+            const data = docItem.data()
 
-  // Escucha cambios en tiempo real
-  onSnapshot(scansQuery, (snapshot) => {
+            ranking.push(data)
+            total += data.count
 
-    tableBody.innerHTML = "";
-    let ranking = [];
+        })
 
-    snapshot.forEach((docItem) => {
+        updateGlobalCounter(total)
 
-      const data = docItem.data();
-      ranking.push(data);
+        detectRankingChanges(ranking)
 
-      const uid = data.uid;
-      const count = data.count;
+        detectPodiumChanges(ranking)
 
-      if (previousCounts[uid] !== undefined && count > previousCounts[uid]) {
-        showScanNotification(uid);
-      }
+        updatePodium(ranking)
 
-      previousCounts[uid] = count;
+        updateTable(ranking)
 
-    });
+        previousRanking = ranking.map(x => x.uid)
 
-    updatePodium(ranking);
-    updateTable(ranking);
+    })
 
-  });
+    function updateGlobalCounter(total) {
 
-
-
-  // PODIO
-  function updatePodium(ranking) {
-
-    const podiumSlots = ["first", "second", "third"];
-    const animations = [
-      "podium-animate-gold",
-      "podium-animate-silver",
-      "podium-animate-bronze"
-    ];
-
-    podiumSlots.forEach((slot, i) => {
-
-      const data = ranking[i];
-
-      const nameEl = document.querySelector(`#${slot} .name`);
-      const scoreEl = document.querySelector(`#${slot} .score`);
-
-      if (!nameEl || !scoreEl) return;
-
-      const uid = data ? data.uid : "";
-
-      if (lastPodium[slot] !== uid && uid !== "") {
-
-        nameEl.classList.add(animations[i]);
-        scoreEl.classList.add(animations[i]);
-
-        setTimeout(() => {
-          nameEl.classList.remove(animations[i]);
-          scoreEl.classList.remove(animations[i]);
-        }, 600);
-
-      }
-
-      nameEl.textContent = uid;
-      scoreEl.textContent = data ? data.count : "";
-
-      lastPodium[slot] = uid;
-
-    });
-
-  }
-
-
-
-  // TABLA COMPLETA
-  function updateTable(ranking) {
-
-    const now = Date.now();
-
-    ranking.forEach((data, index) => {
-
-      const lastScan = data.lastScan || 0;
-
-      const remaining = Math.max(
-        0,
-        COOLDOWN - (now - lastScan)
-      );
-
-      const minutes = Math.floor(remaining / 60000);
-      const seconds = Math.floor((remaining % 60000) / 1000);
-
-      const timeStr = lastScan
-        ? new Date(lastScan).toLocaleTimeString()
-        : "-";
-
-      const row = document.createElement("tr");
-
-      row.innerHTML = `
-        <td>${index + 1}</td>
-        <td>${data.uid}</td>
-        <td>${data.count}</td>
-        <td>
-          ${timeStr}
-          ${remaining > 0
-            ? ` (activo en ${minutes}:${seconds.toString().padStart(2,'0')})`
-            : ""}
-        </td>
-      `;
-
-      tableBody.appendChild(row);
-
-    });
-
-  }
-
-
-
-  // NOTIFICACIÓN DE ESCANEO
-  function showScanNotification(uid) {
-
-    const el = document.getElementById("scanNotification");
-
-    if (!el) return;
-
-    el.textContent = `🔥 +1 punto para ${uid}`;
-
-    el.classList.remove("scan-show");
-
-    void el.offsetWidth;
-
-    el.classList.add("scan-show");
-
-  }
-
-
-
-  // SIMULACIÓN DE ESCANEO
-  button.addEventListener("click", simulateScan);
-
-  async function simulateScan() {
-
-    const randomUID = "bracelet_" + Math.floor(Math.random() * 5 + 1);
-
-    const ref = doc(db, "scans", randomUID);
-
-    const snap = await getDoc(ref);
-
-    const now = Date.now();
-
-
-
-    if (!snap.exists()) {
-
-      await setDoc(ref, {
-        uid: randomUID,
-        count: 1,
-        lastScan: now
-      });
-
-    } else {
-
-      const data = snap.data();
-
-      if (now - data.lastScan > COOLDOWN) {
-
-        await updateDoc(ref, {
-          count: increment(1),
-          lastScan: now
-        });
-
-      } else {
-
-        cooldownMessage.style.display = "block";
-
-        setTimeout(() => {
-          cooldownMessage.style.display = "none";
-        }, 3000);
-
-        console.log("Scan ignorado (cooldown)");
-
-      }
+        totalScansEl.textContent = total
 
     }
 
-  }
+    function detectRankingChanges(ranking) {
 
-});
+        ranking.forEach((data) => {
+
+            const uid = data.uid
+            const name = data.name || uid
+            const count = data.count
+
+            if (previousCounts[uid] !== undefined && count > previousCounts[uid]) {
+
+                showScanNotification(`🍺 ${name} bebe una más`)
+
+            }
+
+            previousCounts[uid] = count
+
+        })
+
+    }
+
+    function detectPodiumChanges(ranking) {
+
+        const top3 = ranking.slice(0, 3)
+
+        top3.forEach((data, index) => {
+
+            const uid = data.uid
+            const name = data.name || uid
+
+            const prevIndex = previousRanking.indexOf(uid)
+
+            const slot = ["first", "second", "third"][index]
+
+            const podiumEl = document.getElementById(slot)
+
+            if (prevIndex === -1) return
+
+            if (prevIndex >= 3 && index < 3) {
+
+                podiumEl.classList.add("podium-new")
+
+                showScanNotification(`🚀 ${name} entra al PODIO`)
+
+            }
+
+            if (prevIndex > index) {
+
+                podiumEl.classList.add("podium-change")
+
+                showScanNotification(`⬆ ${name} sube al puesto ${index + 1}`)
+
+            }
+
+            setTimeout(() => {
+
+                podiumEl.classList.remove("podium-change")
+                podiumEl.classList.remove("podium-new")
+
+            }, 1000)
+
+        })
+
+    }
+
+    function updatePodium(ranking) {
+
+        const slots = ["first", "second", "third"]
+
+        slots.forEach((slot, i) => {
+
+            const data = ranking[i]
+
+            const nameEl = document.querySelector(`#${slot} .name`)
+            const scoreEl = document.querySelector(`#${slot} .score`)
+
+            if (!nameEl || !scoreEl) return
+
+            nameEl.textContent = data ? (data.name || data.uid) : ""
+            scoreEl.textContent = data ? data.count : ""
+
+        })
+
+    }
+
+    function updateTable(ranking) {
+
+        tableBody.innerHTML = ""
+
+        ranking.forEach((data, index) => {
+
+            const uid = data.uid
+            const name = data.name || uid
+            const lastScan = data.lastScan || 0
+
+            const timeStr = lastScan
+                ? new Date(lastScan).toLocaleTimeString()
+                : "-"
+
+            const row = document.createElement("tr")
+
+            if (previousRanking.indexOf(uid) > index) {
+
+                row.classList.add("rank-up")
+
+            }
+
+            if (previousCounts[uid] !== undefined && data.count > previousCounts[uid]) {
+
+                row.classList.add("drink-flash")
+
+            }
+
+            row.innerHTML = `
+                <td>${index + 1}</td>
+                <td>${name}</td>
+                <td>${data.count}</td>
+                <td>${timeStr}</td>
+            `
+
+            tableBody.appendChild(row)
+
+        })
+
+    }
+
+    function showScanNotification(text) {
+
+        const el = document.getElementById("scanNotification")
+
+        el.textContent = text
+
+        el.classList.remove("scan-show")
+        void el.offsetWidth
+        el.classList.add("scan-show")
+
+    }
+
+    function startAutoScroll() {
+
+        const speed = 0.3
+
+        setInterval(() => {
+
+            if (tableContainer.scrollHeight <= tableContainer.clientHeight) return
+
+            tableContainer.scrollTop += speed
+
+            if (tableContainer.scrollTop >= tableContainer.scrollHeight - tableContainer.clientHeight) {
+
+                tableContainer.scrollTop = 0
+
+            }
+
+        }, 16)
+
+    }
+
+})
