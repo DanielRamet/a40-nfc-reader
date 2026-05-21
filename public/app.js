@@ -1,4 +1,4 @@
-import { db } from "./firebase.js"
+import { db, auth, onAuthStateChanged } from "./firebase.js"
 
 import {
     collection,
@@ -23,31 +23,42 @@ document.addEventListener("DOMContentLoaded", () => {
         orderBy("count", "desc")
     )
 
-    onSnapshot(scansQuery, (snapshot) => {
+    onAuthStateChanged(auth, (user) => {
 
-        let ranking = []
-        let total = 0
+        if (!user) {
+            console.log("Esperando login...");
+            return;
+        }
 
-        snapshot.forEach((docItem) => {
+        console.log("Usuario autenticado:", user.uid);
 
-            const data = docItem.data()
+        onSnapshot(scansQuery, (snapshot) => {
 
-            ranking.push(data)
-            total += data.count
+            let ranking = []
+            let total = 0
+
+            snapshot.forEach((docItem) => {
+
+                const data = docItem.data()
+
+                ranking.push(data)
+                total += data.count
+
+            })
+
+            updateGlobalCounter(total)
+
+            detectRankingChanges(ranking)
+
+            detectPodiumChanges(ranking)
+
+            updatePodium(ranking)
+
+            updateTable(ranking)
+
+            previousRanking = ranking.map(x => x.uid)
 
         })
-
-        updateGlobalCounter(total)
-
-        detectRankingChanges(ranking)
-
-        detectPodiumChanges(ranking)
-
-        updatePodium(ranking)
-
-        updateTable(ranking)
-
-        previousRanking = ranking.map(x => x.uid)
 
     })
 
@@ -171,7 +182,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             row.innerHTML = `
                 <td>${index + 1}</td>
-                <td>${name}</td>
+                <td>${name} (${data.uid})</td>
                 <td>${data.count}</td>
                 <td>${timeStr}</td>
             `
