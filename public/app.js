@@ -21,6 +21,12 @@ const festiveMessages = [
     "¡Qué alegría! +1"
 ];
 
+// Flujos de imágenes para el movimiento en el modal
+const chibiPairs = [
+    { open: "assets/chibi2.jpg", wink: "assets/chibi1.jpg" },
+    { open: "assets/chibi4.jpg", wink: "assets/chibi3.jpg" }
+];
+
 document.addEventListener("DOMContentLoaded", () => {
 
     const tableBody = document.getElementById("tableBody")
@@ -30,10 +36,21 @@ document.addEventListener("DOMContentLoaded", () => {
     let previousCounts = {}
     let previousRanking = []
 
-    // Ocultar pantalla de bienvenida después de 3 segundos
+    // --- ANIMACIÓN GIF EN EL SPLASH SCREEN ---
+    const splashChibiImg = document.getElementById('splashChibi');
+    let splashToggle = false;
+    const splashInterval = setInterval(() => {
+        if (splashChibiImg) {
+            splashChibiImg.src = splashToggle ? "assets/chibi1.jpg" : "assets/chibi2.jpg";
+            splashToggle = !splashToggle;
+        }
+    }, 400); // Alterna cada 400ms
+
+    // Ocultar pantalla de bienvenida después de 3 segundos y detener animación
     setTimeout(() => {
         const splash = document.getElementById('splashScreen');
         if (splash) splash.classList.add('hidden');
+        clearInterval(splashInterval);
     }, 3000);
 
     startAutoScroll()
@@ -98,7 +115,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (previousCounts[uid] !== undefined && count > previousCounts[uid]) {
 
-                // Mostrar modal NFC con mensaje festivo aleatorio
+                // Mostrar modal NFC con animación y mensaje festivo aleatorio
                 showNFCModal();
 
             }
@@ -226,28 +243,38 @@ document.addEventListener("DOMContentLoaded", () => {
 
     }
 
-    // Función para mostrar el modal animado NFC
+    // --- FUNCIÓN DEL MODAL NFC CON FLUJO ALEATORIO DE IMÁGENES ---
     function showNFCModal() {
         const overlay = document.getElementById('modalOverlay');
         const messageEl = document.querySelector('.modal-message');
-        const image = document.querySelector('.chibi-modal');
+        const image = document.getElementById('modalChibi');
 
-        // Seleccionar un mensaje aleatorio
-        const randomIndex = Math.floor(Math.random() * festiveMessages.length);
-        messageEl.textContent = festiveMessages[randomIndex];
+        // 1. Mensaje aleatorio
+        const randomMsgIndex = Math.floor(Math.random() * festiveMessages.length);
+        messageEl.textContent = festiveMessages[randomMsgIndex];
 
-        // Añadir efecto de guiño al chibi
-        image.classList.add('wink');
-        setTimeout(() => image.classList.remove('wink'), 500);
+        // 2. Selección aleatoria de par de imágenes (chibi1/2 ó chibi3/4)
+        const randomPairIndex = Math.floor(Math.random() * chibiPairs.length);
+        const selectedPair = chibiPairs[randomPairIndex];
+
+        // Establecer imagen inicial (ojos abiertos)
+        image.src = selectedPair.open;
 
         // Mostrar modal
         overlay.classList.remove('modal-hidden');
         overlay.classList.add('modal-show');
 
-        // Ocultar después de 2 segundos
+        // Transición de guiño/movimiento a los 300ms
+        setTimeout(() => {
+            image.src = selectedPair.wink;
+            image.classList.add('wink');
+        }, 300);
+
+        // Ocultar modal después de 2 segundos y reiniciar estado
         setTimeout(() => {
             overlay.classList.remove('modal-show');
             overlay.classList.add('modal-hidden');
+            image.classList.remove('wink');
         }, 2000);
     }
 

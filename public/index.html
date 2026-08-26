@@ -4,7 +4,7 @@
 <head>
 
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Etiqueta clave para Responsive -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Drunk Meter - AsunFest</title>
 
     <link rel="stylesheet" href="style.css">
@@ -14,9 +14,9 @@
 
 <body>
 
-    <!-- Splash Screen de bienvenida -->
+    <!-- Splash Screen de bienvenida con animación tipo GIF -->
     <div id="splashScreen">
-        <img src="assets/chibi1.jpg" alt="AsunFest Chibi" class="splash-chibi">
+        <img id="splashChibi" src="assets/chibi1.jpg" alt="AsunFest Chibi" class="splash-chibi">
         <h2>¡Preparando el Borrachómetro!</h2>
     </div>
 
@@ -61,7 +61,7 @@
 
     </div>
 
-    <!-- Encabezado del ranking con el Avatar Chibi y título de la reina -->
+    <!-- Encabezado del ranking con Avatar y Título -->
     <div class="ranking-header">
         <img src="assets/chibi1.jpg" alt="Avatar Chibi" class="ranking-avatar">
         <div class="ranking-title-group">
@@ -93,10 +93,10 @@
 
     <div id="scanNotification"></div>
 
-    <!-- Modal para notificaciones NFC (Con imagen y animación) -->
+    <!-- Modal para notificaciones NFC -->
     <div id="modalOverlay" class="modal-hidden">
         <div class="modal">
-            <img src="assets/chibi1.jpg" alt="Chibi" class="chibi-modal">
+            <img id="modalChibi" src="assets/chibi1.jpg" alt="Chibi" class="chibi-modal modal-chibi-img">
             <p class="modal-message"></p>
         </div>
     </div>
