@@ -20,7 +20,12 @@
         </a>
     </div>
 
-    <h1>🍻 DRUNK METER</h1>
+    <!-- Pantalla de bienvenida / Splash Screen -->
+    <div id="splashScreen" class="splash">
+        <img src="assets/chibi1.jpg" alt="Chibi Character" class="chibi-splash">
+    </div>
+
+    <h1>🍻 ¡ BORRACHÓMETRO ! </h1>
 
     <div id="globalCounter">
 
@@ -54,7 +59,12 @@
 
     </div>
 
-    <h2>Ranking</h2>
+    <!-- Encabezado del ranking con avatar chibi -->
+    <div class="ranking-header">
+        <img src="assets/chibi1.jpg" alt="Reina del Brindis" class="chibi-avatar">
+        <span>Reina del Brindis</span>
+        <h2>Ranking</h2>
+    </div>
 
     <div id="tableContainer">
 
@@ -78,6 +88,14 @@
     </div>
 
     <div id="scanNotification"></div>
+
+    <!-- Modal para notificaciones NFC -->
+    <div id="modalOverlay" class="modal-hidden">
+        <div class="modal">
+            <img src="assets/chibi1.jpg" alt="Chibi" class="chibi-modal">
+            <p class="modal-message"></p>
+        </div>
+    </div>
 
     <script type="module" src="app.js"></script>
 

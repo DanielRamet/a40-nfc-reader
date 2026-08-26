@@ -7,6 +7,20 @@ import {
     onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js"
 
+// Mensajes festivos aleatorios para el modal NFC
+const festiveMessages = [
+    "¡Salud! +1 a la cuenta",
+    "¡Brindo! Una más",
+    "¡Qué bueno! +1",
+    "¡Sí! Otra ronda",
+    "¡Genial! +1",
+    "¡Excelente! +1 más",
+    "¡Fantástico! +1",
+    "¡Perfecto! +1",
+    "¡Brindis! +1",
+    "¡Qué alegría! +1"
+];
+
 document.addEventListener("DOMContentLoaded", () => {
 
     const tableBody = document.getElementById("tableBody")
@@ -15,6 +29,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let previousCounts = {}
     let previousRanking = []
+
+    // Ocultar pantalla de bienvenida después de 3 segundos
+    setTimeout(() => {
+        const splash = document.getElementById('splashScreen');
+        if (splash) splash.classList.add('hidden');
+    }, 3000);
 
     startAutoScroll()
 
@@ -78,7 +98,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (previousCounts[uid] !== undefined && count > previousCounts[uid]) {
 
-                showScanNotification(`🍺 ${name} bebe una más`)
+                // Mostrar modal NFC con mensaje festivo aleatorio
+                showNFCModal();
 
             }
 
@@ -205,6 +226,31 @@ document.addEventListener("DOMContentLoaded", () => {
 
     }
 
+    // Función para mostrar el modal animado NFC con imagen chibi y mensaje aleatorio
+    function showNFCModal() {
+        const overlay = document.getElementById('modalOverlay');
+        const messageEl = document.querySelector('.modal-message');
+        const image = document.querySelector('.modal .chibi-modal');
+
+        // Seleccionar un mensaje aleatorio
+        const randomIndex = Math.floor(Math.random() * festiveMessages.length);
+        messageEl.textContent = festiveMessages[randomIndex];
+
+        // Añadir efecto de guiño al chibi
+        image.classList.add('wink');
+        setTimeout(() => image.classList.remove('wink'), 500);
+
+        // Mostrar modal
+        overlay.classList.remove('modal-hidden');
+        overlay.classList.add('modal-show');
+
+        // Ocultar después de 2 segundos
+        setTimeout(() => {
+            overlay.classList.remove('modal-show');
+            overlay.classList.add('modal-hidden');
+        }, 2000);
+    }
+
     function startAutoScroll() {
 
         const speed = 0.3
@@ -225,4 +271,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     }
 
-})
+})```
+
+public\style.css
