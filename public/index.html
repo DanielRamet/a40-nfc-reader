@@ -4,7 +4,8 @@
 <head>
 
     <meta charset="UTF-8">
-    <title>Drunk Meter</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Etiqueta clave para Responsive -->
+    <title>Drunk Meter - AsunFest</title>
 
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="favicon.png">
@@ -13,9 +14,15 @@
 
 <body>
 
+    <!-- Splash Screen de bienvenida -->
+    <div id="splashScreen">
+        <img src="assets/chibi1.jpg" alt="AsunFest Chibi" class="splash-chibi">
+        <h2>¡Preparando el Borrachómetro!</h2>
+    </div>
+
     <!-- Enlace a la aplicación en la esquina superior izquierda -->
-    <div style="position: absolute; top: 10px; left: 10px;">
-        <a href="https://a40-nfc-reader.web.app/" style="text-decoration: none; color: white; font-size: 16px;">
+    <div class="top-link">
+        <a href="https://a40-nfc-reader.web.app/">
             https://a40-nfc-reader.web.app/
         </a>
     </div>
@@ -54,9 +61,13 @@
 
     </div>
 
-    <!-- Encabezado del ranking -->
+    <!-- Encabezado del ranking con el Avatar Chibi y título de la reina -->
     <div class="ranking-header">
-        <h2>Ranking</h2>
+        <img src="assets/chibi1.jpg" alt="Avatar Chibi" class="ranking-avatar">
+        <div class="ranking-title-group">
+            <h2>Ranking</h2>
+            <span class="reina-brindis-title">👑 Reina del Brindis 👑</span>
+        </div>
     </div>
 
     <div id="tableContainer">
@@ -82,9 +93,10 @@
 
     <div id="scanNotification"></div>
 
-    <!-- Modal para notificaciones NFC (Sin imagen) -->
+    <!-- Modal para notificaciones NFC (Con imagen y animación) -->
     <div id="modalOverlay" class="modal-hidden">
         <div class="modal">
+            <img src="assets/chibi1.jpg" alt="Chibi" class="chibi-modal">
             <p class="modal-message"></p>
         </div>
     </div>
