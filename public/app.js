@@ -226,19 +226,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     }
 
-    // Función para mostrar el modal animado NFC con imagen chibi y mensaje aleatorio
+    // Función para mostrar el modal animado NFC solo con el mensaje aleatorio
     function showNFCModal() {
         const overlay = document.getElementById('modalOverlay');
         const messageEl = document.querySelector('.modal-message');
-        const image = document.querySelector('.modal .chibi-modal');
 
         // Seleccionar un mensaje aleatorio
         const randomIndex = Math.floor(Math.random() * festiveMessages.length);
         messageEl.textContent = festiveMessages[randomIndex];
-
-        // Añadir efecto de guiño al chibi
-        image.classList.add('wink');
-        setTimeout(() => image.classList.remove('wink'), 500);
 
         // Mostrar modal
         overlay.classList.remove('modal-hidden');
