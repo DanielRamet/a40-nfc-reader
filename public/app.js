@@ -271,6 +271,4 @@ document.addEventListener("DOMContentLoaded", () => {
 
     }
 
-})```
-
-public\style.css
+})
